@@ -1,0 +1,61 @@
+---
+title: "Project"
+author: "Jesus Manrique"
+date: "March 17, 2015"
+output: html_document
+---
+
+
+I first call the libraries and load the data
+
+
+```{r, message=FALSE}
+library(caret)
+library(randomForest)
+mytrainingdata = read.csv("/Users/manche/Downloads/pml-training.csv")  # read csv file
+mytestingdata = read.csv("/Users/manche/Downloads/pml-testing.csv")  # read csv file
+```
+
+There are many columns that contain NA, "#DIV/0!" or blank spaces. When this occurs, it happens for a very large number of observations. Thus, for those vriables the amount of valid observations is very small compared to the others and it is reasonable to exclude them from the model. I 'clean' the data removing those variables.
+
+
+```{r}
+mytrainingdata[mytrainingdata=="#DIV/0!"] <- NA
+mytrainingdata[mytrainingdata==""] <- NA
+mytrainingdata<-mytrainingdata[, colSums(is.na(mytrainingdata)) == 0]
+```
+
+As stated in the description of the problem, the idea is to find an algorith that predicts the performance of a person (called variable "classe") given the  recorded data in their . I will, thus, work only with the variables that apparently are related to the records of these machines and, thus, will exclude from my training algorithm variables such as "X", "user_name"  "raw_timestamp_part_1", "raw_timestamp_part_2","cvtd_timestamp","new_window", "num_window". One could argue that the variable "user_name" can be relevant (perhaps  the records for different individuals are very different even if they do the same performance) but the idea is to have a universal algorithm that works only with the data from the accelerometers, no matter who performs the task. As we will see, one can obtain a great accuracy by constructing a model only with the variables that I am preserving.  
+
+
+```{r}
+mytrainingdata<-mytrainingdata[,8:60]
+```
+
+I will then run a training algorithm for this data set. I tried first with a decission tree and with linear discriminant analysis but the performance was not very accurate (<0.5). I then implemented a random forest algorithm. I reduced the number of trees to 50, instead of 500 (default) and  performed a 3-fold cross-validation instead of  and  10-fold (that is the default in the train function), for reasonable computation times (~20 min. MacBook Pro). 
+
+
+
+```{r}
+set.seed(5684)
+ctrl=trainControl(number=3) #this is a control variable that will tell train() the number of folds to cross-validate
+modelFit<-train(classe~., method='rf',data=mytrainingdata, trControl=ctrl, ntrees=50)
+```
+
+```{r}
+fancyRpartPlot(modelFit$finalModel)
+```
+The accuracy of the model is summarized here:
+
+```{r, echo=FALSE}
+modelFit
+```
+It must be taken into consideration that a small value of k in  the k-fold cross-validation scheme  introduces a bias that overestimates the error. So, in theory, the performance of this algorithm is more accurate that what the summary above predicts. Besides, the variance of the estimate of the accuracy is small (precisely because I am using a small value of k). These two facts guarantee that the accuracy of the model is, with high probability, larger than 99%.
+
+Finally, I used this model to predict the cathegory of the performances observed in the testing data set
+
+```{r}
+Results<-data.frame("problem_id"=mytestingdata$problem_id,"prediction"=predict(modelFit, mytestingdata), check.names=FALSE)
+Results
+```
+
