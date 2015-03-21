@@ -42,9 +42,7 @@ ctrl=trainControl(number=3) #this is a control variable that will tell train() t
 modelFit<-train(classe~., method='rf',data=mytrainingdata, trControl=ctrl, ntrees=50)
 ```
 
-```{r}
-fancyRpartPlot(modelFit$finalModel)
-```
+
 The accuracy of the model is summarized here:
 
 ```{r, echo=FALSE}
