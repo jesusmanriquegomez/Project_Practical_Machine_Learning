@@ -48,7 +48,7 @@ The accuracy of the model is summarized here:
 ```{r, echo=FALSE}
 modelFit
 ```
-It must be taken into consideration that a small value of k in  the k-fold cross-validation scheme  introduces a bias that overestimates the error. So, in theory, the performance of this algorithm is more accurate that what the summary above predicts. Besides, the variance of the estimate of the accuracy is small (precisely because I am using a small value of k). These two facts guarantee that the accuracy of the model is at least 99%, and thus one can expect and out of sample error <1% (~0.7%).
+It must be taken into consideration that a small value of k in  the k-fold cross-validation scheme  introduces a bias that overestimates the error. So, in theory, the performance of this algorithm is more accurate that what the summary above predicts. These guarantees that the accuracy of the model is at least 99%, and thus one can expect and out of sample error <1%.
 
 Finally, I used this model to predict the cathegory of the performances observed in the testing data set
 
